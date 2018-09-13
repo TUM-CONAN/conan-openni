@@ -41,16 +41,10 @@ class LibOpenniConan(ConanFile):
             openni_sln = os.path.join(openni_source_dir, "OpenNI.sln")
             msbuild.build(project_file=openni_sln, targets=["OpenNI", "Devices\PS1080", "Devices\ORBBEC"], build_type=self.settings.build_type)
         else:
-            autotools = AutoToolsBuildEnvironment(self)
-            build_args = [
-                'CFG={0}'.format(self.settings.build_type),
-                'ALLOW_WARNINGS=1',
-                'GLUT_SUPPORTED=0',
-                'INSTALL_LIB_DIR={0}'.format(os.path.join(self.package_folder, "lib")),
-                'INSTALL_INCLUDE_DIR={0}'.format(os.path.join(self.package_folder, "include"))
-            ]
-            autotools.make(args=build_args, target="main")
-            autotools.install()
+            env_build = AutoToolsBuildEnvironment(self)
+            with tools.environment_append(env_build.vars):
+                build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
+                self.run("make" + build_cmd, cwd=openni_source_dir)
 
     def package(self):
         self.copy("FindOpenNI2.cmake", src="patches", dst=".", keep_path=False)
