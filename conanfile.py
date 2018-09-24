@@ -18,6 +18,9 @@ class LibOpenniConan(ConanFile):
     build_subfolder = "build_subfolder"
     short_paths = False
 
+    def configure(self):
+        del self.settings.compiler.libcxx
+
     def system_requirements(self):
         if tools.os_info.linux_distro == "ubuntu":
             pack_names = [
