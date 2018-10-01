@@ -44,7 +44,7 @@ class LibOpenniConan(ConanFile):
         if self.settings.compiler == "Visual Studio":
             cversion = self.settings.compiler.version
             if cversion == "15":
-                tools.patch(itk_source_dir, "patches/msvc2017.patch")
+                tools.patch(openni_source_dir, "patches/msvc2017.patch")
 
         if tools.os_info.is_windows:
             msbuild = MSBuild(self)
