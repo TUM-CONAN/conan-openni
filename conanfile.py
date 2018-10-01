@@ -10,7 +10,10 @@ class LibOpenniConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False]}
     default_options = "shared=True"
-    exports = ["patches/FindOpenNI2.cmake"]
+    exports = [
+        "patches/FindOpenNI2.cmake",
+        "patches/msvc2017.patch"
+    ]
     url = "https://gitlab.lan.local/conan/conan-openni"
     license="Apache License 2.0"
     description = "Open Natural Interaction."
@@ -38,11 +41,20 @@ class LibOpenniConan(ConanFile):
 
     def build(self):
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
+        if self.settings.compiler == "Visual Studio":
+            cversion = self.settings.compiler.version
+            if cversion == "15":
+                tools.patch(itk_source_dir, "patches/msvc2017.patch")
 
         if tools.os_info.is_windows:
             msbuild = MSBuild(self)
             openni_sln = os.path.join(openni_source_dir, "OpenNI.sln")
-            msbuild.build(project_file=openni_sln, targets=["OpenNI", "Devices\PS1080", "Devices\ORBBEC"], build_type=self.settings.build_type)
+            msbuild.build(
+                project_file=openni_sln,
+                targets=["OpenNI", r"Devices\PS1080", r"Devices\ORBBEC"],
+                build_type=self.settings.build_type,
+                upgrade_project=False
+            )
         else:
             env_build = AutoToolsBuildEnvironment(self)
             with tools.environment_append(env_build.vars):
