@@ -25,7 +25,7 @@ class LibOpenniConan(ConanFile):
         del self.settings.compiler.libcxx
 
     def system_requirements(self):
-        if tools.os_info.linux_distro == "ubuntu":
+        if tools.os_info.linux_distro == "linuxmint":
             pack_names = [
                 "libusb-1.0-0-dev",
                 "libudev-dev"
