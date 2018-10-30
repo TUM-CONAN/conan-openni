@@ -1,7 +1,6 @@
 variables:
   CONAN_REFERENCE: "openni/2.2.0-rev-958951f"
-  CONAN_USERNAME: "sigth"
-  CONAN_LOGIN_USERNAME: "sight"
+  CONAN_USERNAME: "sight"
   CONAN_CHANNEL: "stable"
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
@@ -29,7 +28,7 @@ msvc2017:
     - windows
 
 gcc-7:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-gcc7:dev
   stage: build
   variables:
     CONAN_GCC_VERSIONS: "7"
@@ -39,7 +38,7 @@ gcc-7:
     - python3 build.py
 
 clang-6:
-  image: registry.lan.local:5000/docker-envdev:dev
+  image: registry.lan.local:5000/docker-envdev-clang6:dev
   stage: build
   variables:
     CONAN_CLANG_VERSIONS: "6.0"
@@ -47,3 +46,13 @@ clang-6:
     - export CC=/usr/bin/clang-6.0
     - export CXX=/usr/bin/clang++-6.0
     - python3 build.py
+    
+macos:
+  stage: build
+  variables:
+    CONAN_APPLE_CLANG_VERSIONS: "9.1"
+    CONAN_USER_HOME: $CI_PROJECT_DIR
+  script:
+    - python3 build.py
+  tags:
+    - macos
