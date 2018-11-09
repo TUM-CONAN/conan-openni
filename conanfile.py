@@ -23,16 +23,28 @@ class LibOpenniConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
+        if 'CI' not in os.environ:
+            os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
-    def system_requirements(self):
+    def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
             pack_names = [
                 "libusb-1.0-0-dev",
                 "libudev-dev"
             ]
             installer = tools.SystemPackageTool()
-            installer.update()
-            installer.install(" ".join(pack_names))
+            for p in pack_names:
+                installer.install(p)
+
+    def system_requirements(self):
+        if tools.os_info.linux_distro == "linuxmint":
+            pack_names = [
+                "libusb-1.0-0",
+                "libudev1"
+            ]
+            installer = tools.SystemPackageTool()
+            for p in pack_names:
+                installer.install(p)
     
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
