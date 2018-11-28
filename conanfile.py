@@ -14,7 +14,7 @@ class LibOpenniConan(ConanFile):
         "patches/FindOpenNI2.cmake",
         "patches/msvc2017.patch"
     ]
-    url = "https://gitlab.lan.local/conan/conan-openni"
+    url = "https://git.ircad.fr/conan/conan-openni"
     license="Apache License 2.0"
     description = "Open Natural Interaction."
     source_subfolder = "source_subfolder"
