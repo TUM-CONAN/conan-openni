@@ -45,7 +45,7 @@ class LibOpenniConan(ConanFile):
             installer = tools.SystemPackageTool()
             for p in pack_names:
                 installer.install(p)
-    
+
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
         tools.get("https://github.com/fw4spl-org/OpenNI2/archive/{0}.tar.gz".format(rev))
@@ -75,49 +75,49 @@ class LibOpenniConan(ConanFile):
 
     def package(self):
         self.copy("FindOpenNI2.cmake", src="patches", dst=".", keep_path=False)
-        self.copy(pattern="*", 
+        self.copy(pattern="*",
                     dst="include/openni2",
                     src="{0}/Include".format(self.source_subfolder),
                     keep_path=True)
         if tools.os_info.is_windows:
-            self.copy(pattern="*.dll", 
-                      dst="bin/openni2/Drivers/",
+            self.copy(pattern="*.dll",
+                      dst="bin/openni2/OpenNI2/Drivers/",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.dll", 
+            self.copy(pattern="*.dll",
                       dst="bin/openni2",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.lib", 
+            self.copy(pattern="*.lib",
                       dst="lib/openni2",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.lib", 
-                      dst="lib/openni2/Drivers/",
+            self.copy(pattern="*.lib",
+                      dst="lib/openni2/OpenNI2/Drivers/",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*", 
+            self.copy(pattern="*",
                       dst="bin/openni2",
                       src="{0}/Config".format(self.source_subfolder),
                       keep_path=True)
         else:
-            self.copy(pattern="*.dylib", 
-                      dst="lib/openni2/Drivers/",
+            self.copy(pattern="*.dylib",
+                      dst="lib/openni2/OpenNI2/Drivers/",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.dylib", 
+            self.copy(pattern="*.dylib",
                       dst="lib/openni2",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.so", 
-                      dst="lib/openni2/Drivers/",
+            self.copy(pattern="*.so",
+                      dst="lib/openni2/OpenNI2/Drivers/",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*.so", 
+            self.copy(pattern="*.so",
                       dst="lib/openni2",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
-            self.copy(pattern="*", 
+            self.copy(pattern="*",
                       dst="lib/openni2",
                       src="{0}/Config".format(self.source_subfolder),
                       keep_path=True)
@@ -126,11 +126,11 @@ class LibOpenniConan(ConanFile):
             # LINUX WARNING
             # primesense-usb.rules should be copied to '/etc/udev/rules.d/557-primesense-usb.rules' with admin rights (sudo)
             # orbbec-usb.rules should be copied to '/etc/udev/rules.d/558-orbbec-usb.rules' with admin rights (sudo)
-            self.copy(pattern="primesense-usb.rules", 
+            self.copy(pattern="primesense-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
                       keep_path=False)
-            self.copy(pattern="orbbec-usb.rules", 
+            self.copy(pattern="orbbec-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
                       keep_path=False)
