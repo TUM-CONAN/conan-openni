@@ -151,6 +151,7 @@ class LibOpenniConan(ConanFile):
             # LINUX WARNING
             # primesense-usb.rules should be copied to '/etc/udev/rules.d/557-primesense-usb.rules' with admin rights (sudo)
             # orbbec-usb.rules should be copied to '/etc/udev/rules.d/558-orbbec-usb.rules' with admin rights (sudo)
+            # 51-kinect.rules should be copied to '/etc/udev/rules.d/51-kinect.rules' with admin rights (sudo)
             self.copy(pattern="primesense-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
@@ -158,6 +159,10 @@ class LibOpenniConan(ConanFile):
             self.copy(pattern="orbbec-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
+                      keep_path=False)
+            self.copy(pattern="51-kinect.rules",
+                      dst="rules",
+                      src="{0}/platform/linux/udev/".format(self.freenect_source),
                       keep_path=False)
 
     def package_info(self):
