@@ -100,51 +100,52 @@ class LibOpenniConan(ConanFile):
                     keep_path=True)
         if tools.os_info.is_windows:
             self.copy(pattern="*.dll",
-                      dst="bin/openni2/OpenNI2/Drivers/",
+                      dst="bin/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.dll",
-                      dst="bin/openni2",
+                      dst="bin",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.lib",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.lib",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*",
-                      dst="bin/openni2",
+                      dst="bin",
                       src="{0}/Config".format(self.source_subfolder),
                       keep_path=True)
         else:
             self.copy(pattern="*.dylib",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.dylib",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.so",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.so",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Config".format(self.source_subfolder),
                       keep_path=True)
 
             # Also copy freenect driver into OpenNI2/Drivers
+
             self.copy(pattern="*",
-                      dst="lib/openni2/OpenNI2/Drivers/",
-                      src="lib/OpenNI2-FreenectDriver".format(self.source_subfolder),
+                      dst="lib/OpenNI2/Drivers",
+                      src="{0}/lib/OpenNI2-FreenectDriver/".format(self.freenect_build),
                       keep_path=True)
 
         if tools.os_info.is_linux:

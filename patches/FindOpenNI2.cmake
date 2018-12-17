@@ -13,7 +13,7 @@ find_package(PkgConfig QUIET)
 set(OPENNI2_FOUND FALSE CACHE BOOL "" FORCE)
 find_library(OPENNI2_LIBRARY
     NAMES OpenNI2
-    PATH_SUFFIXES lib/openni2/
+    PATH_SUFFIXES lib lib/openni2
 )
 
 # Find include (not useful for windows)
@@ -33,9 +33,9 @@ if(OPENNI2_FOUND)
     set(OPENNI2_FOUND TRUE CACHE BOOL "" FORCE)
     if(WIN32)
         # Find the driver folder
-        find_path(OPENNI2_DRIVERS_DIR NAMES Drivers PATH_SUFFIXES bin/openni2)
+        find_path(OPENNI2_DRIVERS_DIR NAMES Drivers PATH_SUFFIXES bin/OpenNI2)
     else()
-        find_path(OPENNI2_DRIVERS_DIR NAMES Drivers PATH_SUFFIXES lib/openni2)        
+        find_path(OPENNI2_DRIVERS_DIR NAMES Drivers PATH_SUFFIXES lib/OpenNI2)
     endif()
     message(STATUS "OpenNI2 found ( include: ${OPENNI2_INCLUDE_DIRS}, lib: ${OPENNI2_LIBRARY})")
 endif()
