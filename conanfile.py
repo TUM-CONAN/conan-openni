@@ -20,6 +20,9 @@ class LibOpenniConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
     short_paths = False
+    freenect_source = "freenect_src"
+    freenect_build = "freenect_build"
+    freenect_version = "0.5.7"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -51,6 +54,10 @@ class LibOpenniConan(ConanFile):
         tools.get("https://github.com/fw4spl-org/OpenNI2/archive/{0}.tar.gz".format(rev))
         os.rename("OpenNI2-" + rev, self.source_subfolder)
 
+        if tools.os_info.is_linux or tools.os_info.is_macos:
+            tools.get("https://github.com/OpenKinect/libfreenect/archive/v{0}.tar.gz".format(self.freenect_version))
+            os.rename("libfreenect-" + self.freenect_version, self.freenect_source)
+
     def build(self):
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         if self.settings.compiler == "Visual Studio":
@@ -72,6 +79,18 @@ class LibOpenniConan(ConanFile):
             with tools.environment_append(env_build.vars):
                 build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
                 self.run("make" + build_cmd, cwd=openni_source_dir)
+
+        # Build freenect driver on unix system
+        if tools.os_info.is_linux or tools.os_info.is_macos:
+            libfreenect_source_dir = os.path.join(self.source_folder, self.freenect_source)
+            cmake = CMake(self)
+            cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+            cmake.definitions["BUILD_OPENNI2_DRIVER"] = "ON"
+
+            cmake.configure(source_folder=self.freenect_source, build_folder=self.freenect_build)
+            cmake.build()
+            cmake.install()
+
 
     def package(self):
         self.copy("FindOpenNI2.cmake", src="patches", dst=".", keep_path=False)
@@ -120,6 +139,12 @@ class LibOpenniConan(ConanFile):
             self.copy(pattern="*",
                       dst="lib/openni2",
                       src="{0}/Config".format(self.source_subfolder),
+                      keep_path=True)
+
+            # Also copy freenect driver into OpenNI2/Drivers
+            self.copy(pattern="*",
+                      dst="lib/openni2/OpenNI2/Drivers/",
+                      src="lib/OpenNI2-FreenectDriver".format(self.source_subfolder),
                       keep_path=True)
 
         if tools.os_info.is_linux:
