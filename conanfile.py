@@ -20,6 +20,9 @@ class LibOpenniConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
     short_paths = False
+    freenect_source = "freenect_src"
+    freenect_build = "freenect_build"
+    freenect_version = "0.5.7"
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -51,6 +54,10 @@ class LibOpenniConan(ConanFile):
         tools.get("https://github.com/fw4spl-org/OpenNI2/archive/{0}.tar.gz".format(rev))
         os.rename("OpenNI2-" + rev, self.source_subfolder)
 
+        if tools.os_info.is_linux or tools.os_info.is_macos:
+            tools.get("https://github.com/OpenKinect/libfreenect/archive/v{0}.tar.gz".format(self.freenect_version))
+            os.rename("libfreenect-" + self.freenect_version, self.freenect_source)
+
     def build(self):
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         if self.settings.compiler == "Visual Studio":
@@ -73,6 +80,18 @@ class LibOpenniConan(ConanFile):
                 build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
                 self.run("make" + build_cmd, cwd=openni_source_dir)
 
+        # Build freenect driver on unix system
+        if tools.os_info.is_linux or tools.os_info.is_macos:
+            libfreenect_source_dir = os.path.join(self.source_folder, self.freenect_source)
+            cmake = CMake(self)
+            cmake.definitions["BUILD_EXAMPLES"] = "OFF"
+            cmake.definitions["BUILD_OPENNI2_DRIVER"] = "ON"
+
+            cmake.configure(source_folder=self.freenect_source, build_folder=self.freenect_build)
+            cmake.build()
+            cmake.install()
+
+
     def package(self):
         self.copy("FindOpenNI2.cmake", src="patches", dst=".", keep_path=False)
         self.copy(pattern="*",
@@ -81,51 +100,59 @@ class LibOpenniConan(ConanFile):
                     keep_path=True)
         if tools.os_info.is_windows:
             self.copy(pattern="*.dll",
-                      dst="bin/openni2/OpenNI2/Drivers/",
+                      dst="bin/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.dll",
-                      dst="bin/openni2",
+                      dst="bin",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.lib",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.lib",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*",
-                      dst="bin/openni2",
+                      dst="bin",
                       src="{0}/Config".format(self.source_subfolder),
                       keep_path=True)
         else:
             self.copy(pattern="*.dylib",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.dylib",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.so",
-                      dst="lib/openni2/OpenNI2/Drivers/",
+                      dst="lib/OpenNI2/Drivers",
                       src="{0}/Bin/x64-{1}/OpenNI2/Drivers/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*.so",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Bin/x64-{1}/".format(self.source_subfolder, self.settings.build_type),
                       keep_path=False)
             self.copy(pattern="*",
-                      dst="lib/openni2",
+                      dst="lib",
                       src="{0}/Config".format(self.source_subfolder),
+                      keep_path=True)
+
+            # Also copy freenect driver into OpenNI2/Drivers
+
+            self.copy(pattern="*",
+                      dst="lib/OpenNI2/Drivers",
+                      src="{0}/lib/OpenNI2-FreenectDriver/".format(self.freenect_build),
                       keep_path=True)
 
         if tools.os_info.is_linux:
             # LINUX WARNING
             # primesense-usb.rules should be copied to '/etc/udev/rules.d/557-primesense-usb.rules' with admin rights (sudo)
             # orbbec-usb.rules should be copied to '/etc/udev/rules.d/558-orbbec-usb.rules' with admin rights (sudo)
+            # 51-kinect.rules should be copied to '/etc/udev/rules.d/51-kinect.rules' with admin rights (sudo)
             self.copy(pattern="primesense-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
@@ -133,6 +160,10 @@ class LibOpenniConan(ConanFile):
             self.copy(pattern="orbbec-usb.rules",
                       dst="rules",
                       src="{0}/Packaging/Linux/".format(self.source_subfolder),
+                      keep_path=False)
+            self.copy(pattern="51-kinect.rules",
+                      dst="rules",
+                      src="{0}/platform/linux/udev/".format(self.freenect_source),
                       keep_path=False)
 
     def package_info(self):
