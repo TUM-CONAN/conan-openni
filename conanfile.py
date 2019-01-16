@@ -11,6 +11,7 @@ class LibOpenniConan(ConanFile):
     options = {"shared": [True, False]}
     default_options = "shared=True"
     exports = [
+        "patches/CMakeProjectWrapper.txt",
         "patches/FindOpenNI2.cmake",
         "patches/msvc2017.patch"
     ]
@@ -49,6 +50,10 @@ class LibOpenniConan(ConanFile):
             for p in pack_names:
                 installer.install(p)
 
+    def requirements(self):
+        if tools.os_info.is_macos:
+            self.requires("libusb/1.0.22@sight/stable")
+
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
         tools.get("https://github.com/fw4spl-org/OpenNI2/archive/{0}.tar.gz".format(rev))
@@ -60,12 +65,13 @@ class LibOpenniConan(ConanFile):
 
     def build(self):
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
-        if self.settings.compiler == "Visual Studio":
-            cversion = self.settings.compiler.version
-            if cversion == "15":
-                tools.patch(openni_source_dir, "patches/msvc2017.patch")
-
+        
         if tools.os_info.is_windows:
+            if self.settings.compiler == "Visual Studio":
+                cversion = self.settings.compiler.version
+                if cversion == "15":
+                    tools.patch(openni_source_dir, "patches/msvc2017.patch")
+
             msbuild = MSBuild(self)
             openni_sln = os.path.join(openni_source_dir, "OpenNI.sln")
             msbuild.build(
@@ -77,17 +83,32 @@ class LibOpenniConan(ConanFile):
         else:
             env_build = AutoToolsBuildEnvironment(self)
             with tools.environment_append(env_build.vars):
+                if tools.os_info.is_macos:
+                    # Hack to give the correct path for libusb
+                    platform_path = os.path.join(openni_source_dir, "ThirdParty", "PSCommon", "BuildSystem", "Platform.x86")
+                    
+                    with open(platform_path, 'a') as platform_file:
+                        platform_file.write("\nCFLAGS+=-I{0}".format(
+                            self.deps_cpp_info["libusb"].include_paths[0]
+                        ))
+
+                        platform_file.write("\nLDFLAGS+=-l{0} -L{1}".format(
+                            self.deps_cpp_info["libusb"].libs[0],
+                            self.deps_cpp_info["libusb"].lib_paths[0]
+                        ))
+                    
                 build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
                 self.run("make" + build_cmd, cwd=openni_source_dir)
 
         # Build freenect driver on unix system
         if tools.os_info.is_linux or tools.os_info.is_macos:
-            libfreenect_source_dir = os.path.join(self.source_folder, self.freenect_source)
+            shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
+            
             cmake = CMake(self)
             cmake.definitions["BUILD_EXAMPLES"] = "OFF"
             cmake.definitions["BUILD_OPENNI2_DRIVER"] = "ON"
 
-            cmake.configure(source_folder=self.freenect_source, build_folder=self.freenect_build)
+            cmake.configure(build_folder=self.freenect_build)
             cmake.build()
             cmake.install()
 
