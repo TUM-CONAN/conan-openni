@@ -31,6 +31,7 @@ mark_as_advanced(OPENNI2_FOUND)
 
 if(OPENNI2_FOUND)
     set(OPENNI2_FOUND TRUE CACHE BOOL "" FORCE)
+    set(OPENNI2_LIBRARIES ${OPENNI2_LIBRARY})
     if(WIN32)
         # Find the driver folder
         find_path(OPENNI2_DRIVERS_DIR NAMES Drivers PATH_SUFFIXES bin/OpenNI2)
