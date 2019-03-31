@@ -19,16 +19,6 @@ msvc2017:
     - shell
     - windows
 
-gcc-7:
-  image: ${DOCKER_ENVDEV_GCC7}
-  stage: build
-  variables:
-    CONAN_GCC_VERSIONS: "7"
-  script:
-    - export CC=/usr/bin/gcc-7
-    - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
-
 clang-6:
   image: ${DOCKER_ENVDEV_CLANG6}
   stage: build
@@ -45,9 +35,6 @@ mint19:
   script:
     - export CC=/usr/bin/gcc-7
     - export CXX=/usr/bin/g++-7
-    - python3 conan/gitlab-ci/build.py
-    - export CC=/usr/bin/clang-6.0
-    - export CXX=/usr/bin/clang++-6.0
     - python3 conan/gitlab-ci/build.py
 
 macos-mojave:
