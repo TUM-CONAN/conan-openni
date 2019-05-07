@@ -80,7 +80,7 @@ class LibOpenniConan(ConanFile):
             msbuild.build(
                 project_file=openni_sln,
                 targets=["OpenNI", r"Devices\PS1080", r"Devices\ORBBEC"],
-                build_type=self.settings.build_type,
+                build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                 upgrade_project=False
             )
         else:
