@@ -5,7 +5,10 @@ import shutil
 
 class LibOpenniConan(ConanFile):
     name = "openni"
-    version = "2.2.0-rev-958951f"
+    upstream_version = "2.2.0"
+    package_revision = "-r2"
+    version = "{0}{1}".format(upstream_version, package_revision)
+
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False]}
@@ -52,7 +55,7 @@ class LibOpenniConan(ConanFile):
 
     def requirements(self):
         if tools.os_info.is_macos:
-            self.requires("libusb/1.0.22@sight/stable")
+            self.requires("libusb/1.0.22-r1@sight/stable")
 
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
@@ -77,7 +80,7 @@ class LibOpenniConan(ConanFile):
             msbuild.build(
                 project_file=openni_sln,
                 targets=["OpenNI", r"Devices\PS1080", r"Devices\ORBBEC"],
-                build_type=self.settings.build_type,
+                build_type="Debug" if self.settings.build_type == "Debug" else "Release",
                 upgrade_project=False
             )
         else:
