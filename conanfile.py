@@ -56,7 +56,7 @@ class LibOpenniConan(ConanFile):
     def requirements(self):
         self.requires("common/1.0.0@sight/stable")
         if tools.os_info.is_macos:
-            self.requires("libusb/1.0.22-r2@sight/testing")
+            self.requires("libusb/1.0.22-r1@sight/stable")
 
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
