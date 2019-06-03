@@ -6,7 +6,7 @@ import shutil
 class LibOpenniConan(ConanFile):
     name = "openni"
     upstream_version = "2.2.0"
-    package_revision = "-r2"
+    package_revision = "-r3"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -54,8 +54,9 @@ class LibOpenniConan(ConanFile):
                 installer.install(p)
 
     def requirements(self):
+        self.requires("common/1.0.0@sight/stable")
         if tools.os_info.is_macos:
-            self.requires("libusb/1.0.22-r1@sight/stable")
+            self.requires("libusb/1.0.22-r2@sight/testing")
 
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
@@ -67,6 +68,8 @@ class LibOpenniConan(ConanFile):
             os.rename("libfreenect-" + self.freenect_version, self.freenect_source)
 
     def build(self):
+        #Import common flags and defines
+        import common
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         
         if tools.os_info.is_windows:
@@ -108,6 +111,11 @@ class LibOpenniConan(ConanFile):
             shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
             
             cmake = CMake(self)
+            
+            #Set common flags
+            cmake.definitions["CMAKE_C_FLAGS"] = common.get_c_flags()
+            cmake.definitions["CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
+            
             cmake.definitions["BUILD_EXAMPLES"] = "OFF"
             cmake.definitions["BUILD_OPENNI2_DRIVER"] = "ON"
 
