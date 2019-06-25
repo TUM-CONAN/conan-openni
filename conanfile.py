@@ -6,7 +6,7 @@ import shutil
 class LibOpenniConan(ConanFile):
     name = "openni"
     upstream_version = "2.2.0"
-    package_revision = "-r2"
+    package_revision = "-r3"
     version = "{0}{1}".format(upstream_version, package_revision)
 
     generators = "cmake"
@@ -54,6 +54,7 @@ class LibOpenniConan(ConanFile):
                 installer.install(p)
 
     def requirements(self):
+        self.requires("common/1.0.0@sight/stable")
         if tools.os_info.is_macos:
             self.requires("libusb/1.0.22-r1@sight/stable")
 
@@ -67,6 +68,9 @@ class LibOpenniConan(ConanFile):
             os.rename("libfreenect-" + self.freenect_version, self.freenect_source)
 
     def build(self):
+        # Import common flags and defines
+        import common
+
         openni_source_dir = os.path.join(self.source_folder, self.source_subfolder)
         
         if tools.os_info.is_windows:
@@ -86,28 +90,37 @@ class LibOpenniConan(ConanFile):
         else:
             env_build = AutoToolsBuildEnvironment(self)
             with tools.environment_append(env_build.vars):
-                if tools.os_info.is_macos:
-                    # Hack to give the correct path for libusb
-                    platform_path = os.path.join(openni_source_dir, "ThirdParty", "PSCommon", "BuildSystem", "Platform.x86")
-                    
-                    with open(platform_path, 'a') as platform_file:
-                        platform_file.write("\nCFLAGS+=-I{0}".format(
-                            self.deps_cpp_info["libusb"].include_paths[0]
-                        ))
+                with tools.environment_append({
+                    "CFLAGS":  common.get_full_c_flags(build_type=self.settings.build_type),
+                    "CXXFLAGS":  common.get_full_cxx_flags(build_type=self.settings.build_type)
+                }):
+                    if tools.os_info.is_macos:
+                        # Hack to give the correct path for libusb
+                        platform_path = os.path.join(openni_source_dir, "ThirdParty", "PSCommon", "BuildSystem", "Platform.x86")
+                        
+                        with open(platform_path, 'a') as platform_file:
+                            platform_file.write("\nCFLAGS+=-I{0}".format(
+                                self.deps_cpp_info["libusb"].include_paths[0]
+                            ))
 
-                        platform_file.write("\nLDFLAGS+=-l{0} -L{1}".format(
-                            self.deps_cpp_info["libusb"].libs[0],
-                            self.deps_cpp_info["libusb"].lib_paths[0]
-                        ))
-                    
-                build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
-                self.run("make" + build_cmd, cwd=openni_source_dir)
+                            platform_file.write("\nLDFLAGS+=-l{0} -L{1}".format(
+                                self.deps_cpp_info["libusb"].libs[0],
+                                self.deps_cpp_info["libusb"].lib_paths[0]
+                            ))
+                        
+                    build_cmd = " CFG={0} ALLOW_WARNINGS=1 GLUT_SUPPORTED=0 -f Makefile main".format(self.settings.build_type)
+                    self.run("make" + build_cmd, cwd=openni_source_dir)
 
         # Build freenect driver on unix system
         if tools.os_info.is_linux or tools.os_info.is_macos:
             shutil.move("patches/CMakeProjectWrapper.txt", "CMakeLists.txt")
             
             cmake = CMake(self)
+            
+            # Set common flags
+            cmake.definitions["SIGHT_CMAKE_C_FLAGS"] = common.get_c_flags()
+            cmake.definitions["SIGHT_CMAKE_CXX_FLAGS"] = common.get_cxx_flags()
+            
             cmake.definitions["BUILD_EXAMPLES"] = "OFF"
             cmake.definitions["BUILD_OPENNI2_DRIVER"] = "ON"
 
