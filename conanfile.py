@@ -18,7 +18,7 @@ class LibOpenniConan(ConanFile):
         "patches/FindOpenNI2.cmake",
         "patches/msvc2017.patch"
     ]
-    url = "https://git.ircad.fr/conan/conan-openni"
+    url = "https://github.com/ulricheck/conan-openni"
     license="Apache License 2.0"
     description = "Open Natural Interaction."
     source_subfolder = "source_subfolder"
@@ -42,6 +42,14 @@ class LibOpenniConan(ConanFile):
             installer = tools.SystemPackageTool()
             for p in pack_names:
                 installer.install(p)
+        if tools.os_info.linux_distro == "ubuntu":
+            pack_names = [
+                "libusb-1.0-0-dev",
+                "libudev-dev"
+            ]
+            installer = tools.SystemPackageTool()
+            for p in pack_names:
+                installer.install(p)
 
     def system_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
@@ -52,11 +60,19 @@ class LibOpenniConan(ConanFile):
             installer = tools.SystemPackageTool()
             for p in pack_names:
                 installer.install(p)
+        if tools.os_info.linux_distro == "ubuntu":
+            pack_names = [
+                "libusb-1.0-0",
+                "libudev1"
+            ]
+            installer = tools.SystemPackageTool()
+            for p in pack_names:
+                installer.install(p)
 
     def requirements(self):
-        self.requires("common/1.0.0@sight/stable")
+        self.requires("ircad_common/1.0.0@camposs/stable")
         if tools.os_info.is_macos:
-            self.requires("libusb/1.0.22-r1@sight/stable")
+            self.requires("libusb/1.0.22-r1@sight/stable") # not yet available
 
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
