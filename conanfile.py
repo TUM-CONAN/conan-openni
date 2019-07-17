@@ -30,8 +30,8 @@ class LibOpenniConan(ConanFile):
 
     def configure(self):
         del self.settings.compiler.libcxx
-        if 'CI' not in os.environ:
-            os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
+        # if 'CI' not in os.environ:
+        #     os.environ["CONAN_SYSREQUIRES_MODE"] = "verify"
 
     def build_requirements(self):
         if tools.os_info.linux_distro == "linuxmint":
