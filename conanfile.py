@@ -72,7 +72,7 @@ class LibOpenniConan(ConanFile):
     def requirements(self):
         self.requires("ircad_common/1.0.0@camposs/stable")
         if tools.os_info.is_macos:
-            self.requires("libusb/1.0.22-r1@sight/stable") # not yet available
+            self.requires("libusb/1.0.22-r1@camposs/stable")
 
     def source(self):
         rev = "958951f7a6c03c36915e9caf5084b15ecb301d2e"
