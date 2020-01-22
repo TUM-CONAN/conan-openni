@@ -101,7 +101,7 @@ class LibOpenniConan(ConanFile):
                 project_file=openni_sln,
                 targets=["OpenNI", r"Devices\PS1080", r"Devices\ORBBEC"],
                 build_type="Debug" if self.settings.build_type == "Debug" else "Release",
-                upgrade_project=True
+                upgrade_project=False
             )
         else:
             env_build = AutoToolsBuildEnvironment(self)
